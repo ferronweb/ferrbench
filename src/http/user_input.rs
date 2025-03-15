@@ -1,17 +1,20 @@
 use std::convert::TryFrom;
 use std::net::{SocketAddr, ToSocketAddrs};
+use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use http::header::HeaderValue;
 use http::uri::Uri;
 use http::{HeaderMap, Method};
 use hyper::body::Bytes;
+use rustls::ClientConfig;
 use tokio::task::spawn_blocking;
-use tokio_native_tls::TlsConnector;
+use tokio_rustls::TlsConnector;
 
+use super::no_server_verifier::NoServerVerifier;
 use super::BenchType;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub(crate) enum Scheme {
     Http,
     Https(TlsConnector),
@@ -68,18 +71,14 @@ impl UserInput {
         let scheme = match scheme {
             "http" => Scheme::Http,
             "https" => {
-                let mut builder = native_tls::TlsConnector::builder();
+                let mut client_config = ClientConfig::builder().dangerous().with_custom_certificate_verifier(Arc::new(NoServerVerifier::new())).with_no_client_auth();
 
-                builder
-                    .danger_accept_invalid_certs(true)
-                    .danger_accept_invalid_hostnames(true);
-
-                match protocol {
-                    BenchType::HTTP1 => builder.request_alpns(&["http/1.1"]),
-                    BenchType::HTTP2 => builder.request_alpns(&["h2"]),
+                client_config.alpn_protocols = match protocol {
+                    BenchType::HTTP1 => vec![b"http/1.1".to_vec(), b"http/1.0".to_vec()],
+                    BenchType::HTTP2 => vec![b"h2".to_vec()],
                 };
 
-                let connector = TlsConnector::from(builder.build()?);
+                let connector = TlsConnector::from(Arc::new(client_config));
                 Scheme::Https(connector)
             },
             _ => return Err(anyhow::Error::msg("invalid scheme")),

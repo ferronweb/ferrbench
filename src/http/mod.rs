@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::net::SocketAddr;
 use std::time::Duration;
 
@@ -10,6 +11,7 @@ use http::{Method, Request};
 use hyper::body::Bytes;
 use hyper::client::conn::{self, SendRequest};
 use hyper::Body;
+use rustls_pki_types::ServerName;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 use tokio::task::JoinHandle;
@@ -22,6 +24,7 @@ use self::usage::Usage;
 use self::user_input::{Scheme, UserInput};
 use crate::results::WorkerResult;
 
+mod no_server_verifier;
 mod usage;
 mod user_input;
 
@@ -238,7 +241,7 @@ impl RewrkConnector {
         let send_request = match self.scheme {
             Scheme::Http => handshake(conn_builder, stream).await?,
             Scheme::Https(ref tls_connector) => {
-                let stream = tls_connector.connect(&self.host, stream).await?;
+                let stream = tls_connector.connect(ServerName::try_from(self.host.clone())?, stream).await?;
                 handshake(conn_builder, stream).await?
             },
         };

@@ -8,6 +8,7 @@ use anyhow::{Context, Error, Result};
 use clap::{crate_version, Arg, ArgAction, ArgMatches, Command};
 use hyper::body::Bytes;
 use regex::Regex;
+use rustls::crypto::ring::default_provider;
 use tokio::time::Duration;
 
 mod bench;
@@ -28,6 +29,16 @@ static DURATION_MATCH: &str =
 /// suite the arguments and options.
 fn main() {
     let args = parse_args();
+
+    match default_provider().install_default() {
+        Ok(_) => (),
+        Err(_) => {
+            eprintln!(
+                "cannot install Rustls crypto provider."
+            );
+            return;
+        },
+    }
 
     let threads: usize = match args.get_one::<String>("threads").unwrap_or(&"1".to_string()).trim().parse() {
         Ok(v) => v,
