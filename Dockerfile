@@ -12,7 +12,7 @@ RUN strip target/x86_64-unknown-linux-musl/release/rewrk
 
 # Start building the final image
 FROM scratch
-WORKDIR /etc/rewrk
+WORKDIR /bin
 
-COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/rewrk .
-ENTRYPOINT ["./rewrk"]
+COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/ferrbench .
+ENTRYPOINT ["./ferrbench"]
