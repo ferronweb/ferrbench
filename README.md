@@ -1,8 +1,8 @@
-# rewrk
-A more modern http framework benchmark utility.
+# FerrBench
+A more modern http framework benchmark utility, based on [rewrk](https://github.com/lnx-search/rewrk).
 
 ```
-F:\rewrk> rewrk -h http://127.0.0.1:5000 -t 12 -c 60 -d 5s
+F:\ferrbench> ferrbench -h http://127.0.0.1:5000 -t 12 -c 60 -d 5s
 
 Benchmarking 60 connections @ http://127.0.0.1:5000 for 5 seconds
   Latencies:
@@ -34,12 +34,12 @@ The motivation behind this project extends from developers tunnel visioning on b
 The issue is that wrk only handle *some* of the HTTP spec and is entirely biased towards frameworks and servers that can make heavy use of HTTP/1 Pipelining which is no longer enabled in most modern browsers or clients, this can give a very unfair and unreasonable set of stats when comparing frameworks as those at the top are simply
 better at using a process which is now not used greatly.
 
-This is where rewrk comes in, this benchmarker is built on top of [hyper's client api](https://github.com/hyperium/hyper) and brings with it many advantages and more realistic methods of benchmarking.
+This is where FerrBench comes in, this benchmarker is built on top of [hyper's client api](https://github.com/hyperium/hyper) and brings with it many advantages and more realistic methods of benchmarking.
 
 ### Current features
 - Supports **both** HTTP/1 and HTTP/2.
 - Pipelining is disabled giving a more realistic idea on actual performance.
-- Multi-Platform support, developed on Windows but will run on Mac and Linux as well.
+- Cross-platform support.
 
 ### To do list
 - Add a random artificial delay benchmark to simulate random latency with clients.
@@ -61,15 +61,15 @@ Here's an example to produce the following benchmark:
 - on host `http://127.0.0.1:5000` (`-h http://127.0.0.1:5000`)<br>
 
 **CLI command:**<br>
-`rewrk -c 256 -t 12 -d 15s -h http://127.0.0.1:5000 --http2 --pct`
+`ferrbench -c 256 -t 12 -d 15s -h http://127.0.0.1:5000 --http2 --pct`
 
 
 ## CLI Help
-To bring up the help menu simply run `rewrk --help` to produce this:
+To bring up the help menu simply run `ferrbench --help` to produce this:
 
 ```
 USAGE:
-    rewrk.exe [FLAGS] [OPTIONS] --duration <duration> --host <host>
+    ferrbench [FLAGS] [OPTIONS] --duration <duration> --host <host>
 
 FLAGS:
         --help       Prints help information
@@ -89,7 +89,7 @@ OPTIONS:
 Building from source is incredibly simple, just make sure you have a stable version of Rust installed before you start.
 
 **With Cargo Install**
-1) - Run `cargo install rewrk --git https://github.com/ChillFish8/rewrk.git`
+1) - Run `cargo install ferrbench --git https://github.com/ChillFish8/rewrk.git`
 
 **With Cargo Run**
 1) - Clone the repo source code
