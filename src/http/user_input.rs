@@ -91,6 +91,23 @@ impl UserInput {
     }
     let addr = last_addr.ok_or_else(|| anyhow!("hostname lookup failed"))?;
 
+    let mut uri_parts = uri.into_parts();
+    uri_parts.authority = None;
+    uri_parts.scheme = None;
+    let uri = if uri_parts
+      .path_and_query
+      .clone()
+      .map(|q| {
+        let q_str = q.as_str();
+        q_str.is_empty() || q_str == "/"
+      })
+      .unwrap_or(true)
+    {
+      Uri::from_static("/")
+    } else {
+      Uri::from_parts(uri_parts)?
+    };
+
     Ok(Self {
       addr,
       scheme,
