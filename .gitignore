@@ -1,4 +1,17 @@
-/target
-/rewrk.exe
-/venv37
-/Cargo.lock
+# Compiled binaries and generated documentation
+/target/
+
+# Profiling data
+/perf.data
+/perf.data.old
+/flamegraph.svg
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Temporary files used by the editor
+*.swp
+*.swo
