@@ -93,7 +93,7 @@ Options:
 Building from source is incredibly simple, just make sure you have a stable version of Rust installed before you start.
 
 **With Cargo Install**
-1) - Run `cargo install ferrbench --git https://github.com/ChillFish8/rewrk.git`
+1) - Run `cargo install ferrbench --git https://github.com/ferronweb/ferrbench.git`
 
 **With Cargo Run**
 1) - Clone the repo source code
