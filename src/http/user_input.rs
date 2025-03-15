@@ -8,7 +8,6 @@ use http::uri::Uri;
 use http::{HeaderMap, Method};
 use hyper::body::Bytes;
 use rustls::ClientConfig;
-use tokio::task::spawn_blocking;
 use tokio_rustls::TlsConnector;
 
 use super::no_server_verifier::NoServerVerifier;
@@ -43,18 +42,6 @@ pub(crate) struct UserInput {
 
 impl UserInput {
   pub(crate) async fn new(
-    protocol: BenchType,
-    string: String,
-    method: Method,
-    headers: HeaderMap,
-    body: Bytes,
-  ) -> Result<Self> {
-    spawn_blocking(move || Self::blocking_new(protocol, string, method, headers, body))
-      .await
-      .unwrap()
-  }
-
-  fn blocking_new(
     protocol: BenchType,
     string: String,
     method: Method,
