@@ -9,7 +9,7 @@ clap = { version = "4", features = ["cargo"] }
 colored = "3"
 futures-util = "0.3"
 http = "0.2"
-hyper = { version = "0.14", features = ["client", "http1", "http2"] } # TODO: Migrate the codebase from Hyper 0.14.x to 1.x
+hyper = { version = "0.14", features = ["runtime", "client", "http1", "http2"] } # TODO: Migrate the codebase from Hyper 0.14.x to 1.x
 mimalloc = "0.1.43"
 pin-project-lite = "0.2"
 rand = "0.9"
