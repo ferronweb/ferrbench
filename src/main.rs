@@ -76,8 +76,8 @@ fn main() {
     }
   };
 
-  let http2: bool = args.contains_id("http2");
-  let json: bool = args.contains_id("json");
+  let http2: bool = args.get_flag("http2");
+  let json: bool = args.get_flag("json");
 
   let bench_type = if http2 {
     BenchType::HTTP2
@@ -97,7 +97,7 @@ fn main() {
     }
   };
 
-  let pct: bool = args.contains_id("pct");
+  let pct: bool = args.get_flag("pct");
 
   let rounds: usize = args
     .get_one::<String>("rounds")
@@ -251,7 +251,7 @@ fn parse_args() -> ArgMatches {
         .long("http2")
         .help("Set the client to use http2 only. (default is http/1) e.g. '--http2'")
         .required(false)
-        .action(ArgAction::Count),
+        .action(ArgAction::SetTrue),
     )
     .arg(
       Arg::new("duration")
@@ -265,14 +265,14 @@ fn parse_args() -> ArgMatches {
       Arg::new("pct")
         .long("pct")
         .help("Displays the percentile table after benchmarking.")
-        .action(ArgAction::Count)
+        .action(ArgAction::SetTrue)
         .required(false),
     )
     .arg(
       Arg::new("json")
         .long("json")
         .help("Displays the results in a json format")
-        .action(ArgAction::Count)
+        .action(ArgAction::SetTrue)
         .required(false),
     )
     .arg(
