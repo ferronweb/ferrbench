@@ -7,7 +7,7 @@ use anyhow::anyhow;
 use futures_util::stream::FuturesUnordered;
 use futures_util::TryFutureExt;
 use http::header::{self, HeaderMap};
-use http::{Method, Request};
+use http::{Method, Request, Uri};
 use hyper::body::Bytes;
 use hyper::client::conn::{self, SendRequest};
 use hyper::Body;
@@ -79,7 +79,7 @@ pub async fn start_tasks(
 async fn benchmark(
   deadline: Instant,
   bench_type: BenchType,
-  user_input: UserInput,
+  mut user_input: UserInput,
 ) -> anyhow::Result<WorkerResult> {
   let benchmark_start = Instant::now();
   let connector = RewrkConnector::new(
@@ -98,9 +98,25 @@ async fn benchmark(
 
   let mut request_headers = HeaderMap::new();
 
-  // Set "host" header for HTTP/1.
   if bench_type.is_http1() {
+    // Set "host" header and modify the request URL for HTTP/1.
     request_headers.insert(header::HOST, user_input.host_header);
+    let mut uri_parts = user_input.uri.into_parts();
+    uri_parts.authority = None;
+    uri_parts.scheme = None;
+    user_input.uri = if uri_parts
+      .path_and_query
+      .clone()
+      .map(|q| {
+        let q_str = q.as_str();
+        q_str.is_empty() || q_str == "/"
+      })
+      .unwrap_or(true)
+    {
+      Uri::from_static("/")
+    } else {
+      Uri::from_parts(uri_parts)?
+    };
   }
 
   request_headers.extend(user_input.headers);
