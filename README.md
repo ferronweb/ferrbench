@@ -68,20 +68,24 @@ Here's an example to produce the following benchmark:
 To bring up the help menu simply run `ferrbench --help` to produce this:
 
 ```
-USAGE:
-    ferrbench [FLAGS] [OPTIONS] --duration <duration> --host <host>
+Benchmark HTTP/1 and HTTP/2 frameworks without pipelining bias.
 
-FLAGS:
-        --help       Prints help information
-        --http2      Set the client to use http2 only. (default is http/1) e.g. '--http2'
-        --pct        Displays the percentile table after benchmarking.
-    -V, --version    Prints version information
+Usage: ferrbench [OPTIONS] --host <host> --duration <duration>
 
-OPTIONS:
-    -c, --connections <connections>    Set the amount of concurrent e.g. '-c 512' [default: 1]
-    -d, --duration <duration>          Set the duration of the benchmark.
-    -h, --host <host>                  Set the host to bench e.g. '-h http://127.0.0.1:5050'
-    -t, --threads <threads>            Set the amount of threads to use e.g. '-t 12' [default: 1]
+Options:
+      --help                       Print help
+  -t, --threads <threads>          Set the amount of threads to use e.g. '-t 12' [default: 1]
+  -c, --connections <connections>  Set the amount of concurrent e.g. '-c 512' [default: 1]
+  -h, --host <host>                Set the host to bench e.g. '-h http://127.0.0.1:5050'
+      --http2...                   Set the client to use http2 only. (default is http/1) e.g. '--http2'
+  -d, --duration <duration>        Set the duration of the benchmark.
+      --pct...                     Displays the percentile table after benchmarking.
+      --json...                    Displays the results in a json format
+  -r, --rounds <rounds>            Repeats the benchmarks n amount of times
+  -m, --method <method>            Set request method e.g. '-m get'
+  -H, --header <header>            Add header to request e.g. '-H "content-type: text/plain"'
+  -b, --body <body>                Add body to request e.g. '-b "foo"'
+  -V, --version                    Print version
 ```
 
 # Building from source
