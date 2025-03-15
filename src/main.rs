@@ -5,7 +5,7 @@ use std::str::FromStr;
 use ::http::header::HeaderName;
 use ::http::{HeaderMap, HeaderValue, Method};
 use anyhow::{Context, Error, Result};
-use clap::{App, Arg, ArgMatches};
+use clap::{crate_version, Arg, ArgAction, ArgMatches, Command};
 use hyper::body::Bytes;
 use regex::Regex;
 use tokio::time::Duration;
@@ -29,7 +29,7 @@ static DURATION_MATCH: &str =
 fn main() {
     let args = parse_args();
 
-    let threads: usize = match args.value_of("threads").unwrap_or("1").trim().parse() {
+    let threads: usize = match args.get_one::<String>("threads").unwrap_or(&"1".to_string()).trim().parse() {
         Ok(v) => v,
         Err(_) => {
             eprintln!(
@@ -39,7 +39,7 @@ fn main() {
         },
     };
 
-    let conns: usize = match args.value_of("connections").unwrap_or("1").trim().parse() {
+    let conns: usize = match args.get_one::<String>("connections").unwrap_or(&"1".to_string()).trim().parse() {
         Ok(v) => v,
         Err(_) => {
             eprintln!("invalid parameter for 'connections' given, input type must be a integer.");
@@ -47,7 +47,7 @@ fn main() {
         },
     };
 
-    let host: &str = match args.value_of("host") {
+    let host: &str = match args.get_one::<String>("host") {
         Some(v) => v,
         None => {
             eprintln!("missing 'host' parameter.");
@@ -55,8 +55,8 @@ fn main() {
         },
     };
 
-    let http2: bool = args.is_present("http2");
-    let json: bool = args.is_present("json");
+    let http2: bool = args.contains_id("http2");
+    let json: bool = args.contains_id("json");
 
     let bench_type = if http2 {
         BenchType::HTTP2
@@ -64,7 +64,8 @@ fn main() {
         BenchType::HTTP1
     };
 
-    let duration: &str = args.value_of("duration").unwrap_or("1s");
+    let default_duration = "1s".to_string();
+    let duration: &str = args.get_one::<String>("duration").unwrap_or(&default_duration);
     let duration = match parse_duration(duration) {
         Ok(dur) => dur,
         Err(e) => {
@@ -73,17 +74,17 @@ fn main() {
         },
     };
 
-    let pct: bool = args.is_present("pct");
+    let pct: bool = args.contains_id("pct");
 
     let rounds: usize = args
-        .value_of("rounds")
-        .unwrap_or("1")
+        .get_one::<String>("rounds")
+        .unwrap_or(&"1".to_string())
         .trim()
         .parse::<usize>()
         .unwrap_or(1);
 
     let method = match args
-        .value_of("method")
+        .get_one::<String>("method")
         .map(|method| Method::from_str(&method.to_uppercase()))
         .transpose()
     {
@@ -94,7 +95,7 @@ fn main() {
         },
     };
 
-    let headers = if let Some(headers) = args.values_of("header") {
+    let headers = if let Some(headers) = args.get_many::<String>("header") {
         match headers.map(parse_header).collect::<Result<HeaderMap<_>>>() {
             Ok(headers) => headers,
             Err(e) => {
@@ -106,7 +107,8 @@ fn main() {
         HeaderMap::new()
     };
 
-    let body: &str = args.value_of("body").unwrap_or_default();
+    let empty_body = "".to_string();
+    let body: &String = args.get_one::<String>("body").unwrap_or(&empty_body);
     let body = Bytes::copy_from_slice(body.as_bytes());
 
     let settings = bench::BenchmarkSettings {
@@ -172,7 +174,7 @@ fn parse_duration(duration: &str) -> Result<Duration> {
     Ok(dur)
 }
 
-fn parse_header(value: &str) -> Result<(HeaderName, HeaderValue)> {
+fn parse_header(value: &String) -> Result<(HeaderName, HeaderValue)> {
     let (key, value) = value
         .split_once(": ")
         .context("Header value missing colon (\": \")")?;
@@ -182,107 +184,111 @@ fn parse_header(value: &str) -> Result<(HeaderName, HeaderValue)> {
 }
 
 /// Contains Clap's app setup.
-fn parse_args() -> ArgMatches<'static> {
-    App::new("ReWrk")
-        .version("0.3.1")
-        .author("Harrison Burt <hburt2003@gmail.com>")
+fn parse_args() -> ArgMatches {
+    Command::new("FerrBench")
+        .version(crate_version!())
         .about("Benchmark HTTP/1 and HTTP/2 frameworks without pipelining bias.")
+        .disable_help_flag(true)
         .arg(
-            Arg::with_name("threads")
-                .short("t")
+            Arg::new("help")
+            .long("help")
+            .action(ArgAction::Help)
+            .help("Print help"),
+        )
+        .arg(
+            Arg::new("threads")
+                .short('t')
                 .long("threads")
                 .help("Set the amount of threads to use e.g. '-t 12'")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .default_value("1"),
         )
         .arg(
-            Arg::with_name("connections")
-                .short("c")
+            Arg::new("connections")
+                .short('c')
                 .long("connections")
                 .help("Set the amount of concurrent e.g. '-c 512'")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .default_value("1"),
         )
         .arg(
-            Arg::with_name("host")
-                .short("h")
+            Arg::new("host")
+                .short('h')
                 .long("host")
                 .help("Set the host to bench e.g. '-h http://127.0.0.1:5050'")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .required(true),
         )
         .arg(
-            Arg::with_name("http2")
+            Arg::new("http2")
                 .long("http2")
                 .help("Set the client to use http2 only. (default is http/1) e.g. '--http2'")
                 .required(false)
-                .takes_value(false),
+                .action(ArgAction::Count),
         )
         .arg(
-            Arg::with_name("duration")
-                .short("d")
+            Arg::new("duration")
+                .short('d')
                 .long("duration")
                 .help("Set the duration of the benchmark.")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .required(true),
         )
         .arg(
-            Arg::with_name("pct")
+            Arg::new("pct")
                 .long("pct")
                 .help("Displays the percentile table after benchmarking.")
-                .takes_value(false)
+                .action(ArgAction::Count)
                 .required(false),
         )
         .arg(
-            Arg::with_name("json")
+            Arg::new("json")
                 .long("json")
                 .help("Displays the results in a json format")
-                .takes_value(false)
+                .action(ArgAction::Count)
                 .required(false),
         )
         .arg(
-            Arg::with_name("rounds")
+            Arg::new("rounds")
                 .long("rounds")
-                .short("r")
+                .short('r')
                 .help("Repeats the benchmarks n amount of times")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .required(false),
         )
         .arg(
-            Arg::with_name("method")
+            Arg::new("method")
                 .long("method")
-                .short("m")
+                .short('m')
                 .help("Set request method e.g. '-m get'")
-                .takes_value(true)
+                .action(ArgAction::Append)
                 .required(false)
-                .multiple(true),
         )
         .arg(
-            Arg::with_name("header")
+            Arg::new("header")
                 .long("header")
-                .short("H")
+                .short('H')
                 .help("Add header to request e.g. '-H \"content-type: text/plain\"'")
-                .takes_value(true)
+                .action(ArgAction::Append)
                 .required(false)
-                .multiple(true),
         )
         .arg(
-            Arg::with_name("body")
+            Arg::new("body")
                 .long("body")
-                .short("b")
+                .short('b')
                 .help("Add body to request e.g. '-b \"foo\"'")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .required(false),
         )
         //.arg(
-        //    Arg::with_name("random")
+        //    Arg::new("random")
         //        .long("rand")
         //        .help(
         //            "Sets the benchmark type to random mode, \
         //             clients will randomly connect and re-connect.\n\
         //             NOTE: This will cause the HTTP2 flag to be ignored."
         //        )
-        //        .takes_value(false)
+        //        .action(ArgAction::Count)
         //        .required(false)
         //)
         .get_matches()

@@ -5,7 +5,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
-clap = "2"
+clap = { version = "4", features = ["cargo"] }
 colored = "3"
 futures-util = "0.3"
 http = "0.2"
