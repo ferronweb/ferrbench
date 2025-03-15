@@ -7,6 +7,7 @@ use ::http::{HeaderMap, HeaderValue, Method};
 use anyhow::{Context, Error, Result};
 use clap::{crate_version, Arg, ArgAction, ArgMatches, Command};
 use hyper::body::Bytes;
+use mimalloc::MiMalloc;
 use regex::Regex;
 use rustls::crypto::ring::default_provider;
 use tokio::time::Duration;
@@ -22,6 +23,9 @@ use crate::http::BenchType;
 /// Matches a string like '12d 24h 5m 45s' to a regex capture.
 static DURATION_MATCH: &str =
     "(?P<days>[0-9]+)d|(?P<hours>[0-9]+)h|(?P<minutes>[0-9]+)m|(?P<seconds>[0-9]+)s";
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 /// ReWrk
 ///

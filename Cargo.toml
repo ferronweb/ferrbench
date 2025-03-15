@@ -10,6 +10,7 @@ colored = "3"
 futures-util = "0.3"
 http = "0.2"
 hyper = { version = "0.14", features = ["client", "http1", "http2"] } # TODO: Migrate the codebase from Hyper 0.14.x to 1.x
+mimalloc = "0.1.43"
 pin-project-lite = "0.2"
 rand = "0.9"
 regex = "1"
@@ -19,3 +20,9 @@ serde_json = "1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "net", "macros", "time"] }
 tokio-rustls = { version = "0.26", default-features = false, features = ["tls12", "ring"] }
 tower = { version = "0.5", features = ["util"] }
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
