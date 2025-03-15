@@ -50,6 +50,7 @@ impl BenchType {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn start_tasks(
     time_for: Duration,
     connections: usize,

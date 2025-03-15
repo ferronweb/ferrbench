@@ -111,7 +111,7 @@ fn main() {
     };
 
     let headers = if let Some(headers) = args.get_many::<String>("header") {
-        match headers.map(parse_header).collect::<Result<HeaderMap<_>>>() {
+        match headers.map(|s| s as &str).map(parse_header).collect::<Result<HeaderMap<_>>>() {
             Ok(headers) => headers,
             Err(e) => {
                 eprintln!("failed to parse header: {}", e);
@@ -189,7 +189,7 @@ fn parse_duration(duration: &str) -> Result<Duration> {
     Ok(dur)
 }
 
-fn parse_header(value: &String) -> Result<(HeaderName, HeaderValue)> {
+fn parse_header(value: &str) -> Result<(HeaderName, HeaderValue)> {
     let (key, value) = value
         .split_once(": ")
         .context("Header value missing colon (\": \")")?;
