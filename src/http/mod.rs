@@ -148,8 +148,9 @@ async fn benchmark(
       tokio::select! {
           biased;
           result = (&mut connection_task) => {
-              match result.unwrap() {
-                  Ok(()) => Err::<_, anyhow::Error>(anyhow!("connection closed")),
+              match result {
+                  Ok(Ok(())) => Err::<_, anyhow::Error>(anyhow!("connection closed")),
+                  Ok(Err(e)) => Err::<_, anyhow::Error>(anyhow::Error::new(e)),
                   Err(e) => Err::<_, anyhow::Error>(anyhow::Error::new(e)),
               }
           },
