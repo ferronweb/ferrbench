@@ -12,7 +12,6 @@ http = "0.2"
 hyper = { version = "0.14", features = ["runtime", "client", "http1", "http2"] } # TODO: Migrate the codebase from Hyper 0.14.x to 1.x
 mimalloc = "0.1.43"
 pin-project-lite = "0.2"
-rand = "0.9"
 regex = "1"
 rustls = { version = "0.23", default-features = false, features = ["tls12", "ring", "std"] }
 rustls-pki-types = "1.11"
