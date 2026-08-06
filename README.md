@@ -1,3 +1,5 @@
+**🚧 This project is unmaintained and discontinued starting from August 6, 2026, as we're now using [`h2load`](https://nghttp2.org/documentation/h2load-howto.html) and [`wrk`](https://github.com/wg/wrk) instead for our web server benchmarks, and `ferrbench` didn't see (even somewhat) wide adoption anyway**
+
 # FerrBench
 A more modern http framework benchmark utility, based on [rewrk](https://github.com/lnx-search/rewrk).
 
